@@ -38,6 +38,9 @@ database-backup.sql
 # Scripts
 migrate-to-railway.ps1
 
+# Test files
+test-railway-connection.ts
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
