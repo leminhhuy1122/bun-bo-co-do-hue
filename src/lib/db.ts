@@ -1,18 +1,20 @@
-// lib/db.ts - MySQL Database Connection for XAMPP
+// lib/db.ts - MySQL Database Connection
 import mysql from "mysql2/promise";
 
-// Cấu hình kết nối MySQL (XAMPP mặc định)
+// Cấu hình kết nối MySQL
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
   port: parseInt(process.env.DB_PORT || "3306"),
   user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "", // XAMPP mặc định không có password
+  password: process.env.DB_PASSWORD || "",
   database: process.env.DB_NAME || "bun_bo_hue_co_do",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
+  charset: "utf8mb4",
+  collation: "utf8mb4_unicode_ci",
 };
 
 // Tạo connection pool
