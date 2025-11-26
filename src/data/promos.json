@@ -1,0 +1,36 @@
+[
+  {
+    "code": "WELCOME2024",
+    "description": "Giảm 20% cho khách hàng mới",
+    "discountType": "percentage",
+    "discountValue": 20,
+    "minOrderValue": 100000,
+    "maxDiscount": 50000,
+    "expiryDate": "2024-12-31"
+  },
+  {
+    "code": "COMBO50K",
+    "description": "Giảm 50K cho đơn từ 200K",
+    "discountType": "fixed",
+    "discountValue": 50000,
+    "minOrderValue": 200000,
+    "expiryDate": "2024-12-31"
+  },
+  {
+    "code": "FREESHIP",
+    "description": "Miễn phí giao hàng",
+    "discountType": "fixed",
+    "discountValue": 20000,
+    "minOrderValue": 150000,
+    "expiryDate": "2024-12-31"
+  },
+  {
+    "code": "HAPPYHOUR",
+    "description": "Giảm 15% từ 14h-16h",
+    "discountType": "percentage",
+    "discountValue": 15,
+    "minOrderValue": 50000,
+    "maxDiscount": 30000,
+    "expiryDate": "2024-12-31"
+  }
+]

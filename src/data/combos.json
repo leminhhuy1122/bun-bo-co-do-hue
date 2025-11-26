@@ -1,0 +1,34 @@
+[
+  {
+    "id": "combo-gia-dinh",
+    "name": "Combo Gia Đình",
+    "description": "4 tô bún bò đặc biệt + 4 ly nước ngọt",
+    "items": [
+      "bun-bo-dac-biet",
+      "bun-bo-dac-biet",
+      "bun-bo-dac-biet",
+      "bun-bo-dac-biet"
+    ],
+    "originalPrice": 280000,
+    "discountPrice": 200000,
+    "image": "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800"
+  },
+  {
+    "id": "combo-cap-doi",
+    "name": "Combo Cặp Đôi",
+    "description": "2 tô bún bò tái nạm + 2 ly sữa đậu nành",
+    "items": ["bun-bo-tai-nam", "bun-bo-tai-nam"],
+    "originalPrice": 114000,
+    "discountPrice": 85000,
+    "image": "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=800"
+  },
+  {
+    "id": "combo-tiet-kiem",
+    "name": "Combo Tiết Kiệm",
+    "description": "1 tô bún bò + 1 chè Huế + 1 trà đá",
+    "items": ["bun-bo-tai-nam", "dessert-che-hue"],
+    "originalPrice": 65000,
+    "discountPrice": 55000,
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800"
+  }
+]

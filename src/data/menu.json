@@ -1,0 +1,233 @@
+[
+  {
+    "id": "bun-bo-bap-hoa",
+    "name": "Bún Bò Bắp Hoa",
+    "description": "Bún bò với bắp hoa giòn ngon đặc trưng",
+    "price": 79000,
+    "category": "main",
+    "image": "/images/bun-bo-bap-hoa.jpg",
+    "popular": true,
+    "spicyLevel": 5,
+    "available": true
+  },
+  {
+    "id": "bun-bo-dac-biet",
+    "name": "Bún Bò Đặc Biệt",
+    "description": "Bún bò Huế trọn vị với đầy đủ bắp hoa, giò heo, chả cua, tiết",
+    "price": 79000,
+    "category": "main",
+    "image": "/images/bun-bo-dac-biet.jpg",
+    "popular": true,
+    "spicyLevel": 5,
+    "available": true
+  },
+  {
+    "id": "bun-bo-gio-heo",
+    "name": "Bún Bò Giò Heo",
+    "description": "Bún bò với giò heo mềm thơm",
+    "price": 79000,
+    "category": "main",
+    "image": "/images/bun-bo-gio-heo.jpg",
+    "popular": false,
+    "spicyLevel": 5,
+    "available": true
+  },
+  {
+    "id": "bun-bo-tai-nam",
+    "name": "Bún Bò Tái Nạm",
+    "description": "Bún bò với thịt tái và nạm mềm ngon",
+    "price": 69000,
+    "category": "main",
+    "image": "/images/bun-bo-tai-nam.jpg",
+    "popular": true,
+    "spicyLevel": 5,
+    "available": true
+  },
+  {
+    "id": "bun-cha-cua-cha-hue",
+    "name": "Bún Chả Cua - Chả Huế",
+    "description": "Bún với chả cua và chả Huế đặc sản",
+    "price": 79000,
+    "category": "main",
+    "image": "/images/bun-cha-cua-cha-hue.jpg",
+    "popular": true,
+    "spicyLevel": 5,
+    "available": true
+  },
+  {
+    "id": "chen-cha-cua-them",
+    "name": "Chén Chả Cua Thêm",
+    "description": "Thêm chả cua đặc sản Huế",
+    "price": 20000,
+    "category": "side",
+    "image": "/images/chen-cha-cua-them.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "chen-hot-ga",
+    "name": "Chén Hột Gà",
+    "description": "Hột gà tươi ngon đậm đà",
+    "price": 20000,
+    "category": "side",
+    "image": "/images/chen-hot-ga.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "chen-tiet-luoc",
+    "name": "Chén Tiết Luộc",
+    "description": "Tiết luộc tươi ngon",
+    "price": 20000,
+    "category": "side",
+    "image": "/images/chen-tiet-luoc.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "chen-xi-quach",
+    "name": "Chén Xí Quách",
+    "description": "Xí quách thơm ngon, ăn kèm",
+    "price": 30000,
+    "category": "side",
+    "image": "/images/chen-xi-quach.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "rau-nhung-hanh-ngam",
+    "name": "Rau Nhúng & Hành Ngâm Giấm",
+    "description": "Rau sống tươi ngon và hành ngâm giấm chua ngọt",
+    "price": 19000,
+    "category": "side",
+    "image": "/images/rau-nhung-hanh-ngam.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "7up",
+    "name": "7up",
+    "description": "Nước giải khat",
+    "price": 19000,
+    "category": "drink",
+    "image": "https://product.hstatic.net/1000301274/product/_10100996__7up_320ml_sleek_lon_0366766c074a4b538595ed8d91dc6b0d_grande.png",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "nuoc-coca",
+    "name": "Coca Cola",
+    "description": "Coca Cola lon 330ml",
+    "price": 19000,
+    "category": "drink",
+    "image": "/images/nuoc-coca.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "nuoc-mia-tac",
+    "name": "Nước Mía Tắc",
+    "description": "Nước mía tươi ép kết hợp chanh tắc",
+    "price": 25000,
+    "category": "drink",
+    "image": "/images/nuoc-mia-tac.jpg",
+    "popular": true,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "nuoc-sam",
+    "name": "Nước Sâm",
+    "description": "Nước sâm mát lạnh giải nhiệt",
+    "price": 19000,
+    "category": "drink",
+    "image": "/images/nuoc-sam.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "nuoc-rau-ma-dau-xanh",
+    "name": "Rau Má Đậu Xanh",
+    "description": "Nước rau má đậu xanh mát lành",
+    "price": 19000,
+    "category": "drink",
+    "image": "/images/nuoc-rau-ma-dau-xanh.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "sua-dau-nanh-la-dua",
+    "name": "Sữa Đậu Nành (Lá Dứa)",
+    "description": "Sữa đậu nành thơm lá dứa tự làm",
+    "price": 19000,
+    "category": "drink",
+    "image": "/images/sua-dau-nanh-la-dua.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "tra-da",
+    "name": "Trà Đá",
+    "description": "Trà đá tươi mát miễn phí",
+    "price": 0,
+    "category": "drink",
+    "image": "/images/tra-da.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "tra-tac",
+    "name": "Trà Tắc",
+    "description": "Trà tắc vị chanh tươi mát",
+    "price": 19000,
+    "category": "drink",
+    "image": "/images/tra-tac.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "combo-2-nguoi",
+    "name": "Combo Cặp Đôi 2 Người",
+    "description": "Một tô Bún Bò Đặc Biệt, một tô Bún Bò Tái Nạm, hai ly Nước Mía Tắc",
+    "price": 189000,
+    "category": "combo",
+    "image": "/images/combo-2-nguoi.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "combo-1-nguoi",
+    "name": "Combo Cô Đơn Tiết Kiệm 1 Người",
+    "description": "Bún Bò Đặc Biệt, một chén Xí Quách, một ly Nước Mía Tắc, một đĩa nhỏ Rau Nhúng & Hành Ngâm",
+    "price": 99000,
+    "category": "combo",
+    "image": "/images/combo-1-nguoi.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  },
+  {
+    "id": "combo-4-nguoi",
+    "name": "Combo Gia Đình 4 Người",
+    "description": "Bốn tô bún bò (Đặc Biệt, Bắp Hoa, Giò Heo, Tái Nạm), Một chén Xí Quách, Một chén Chả Cua, 2 ly Nước Mía Tắc, 2 ly Rau Má Đậu Xanh",
+    "price": 399000,
+    "category": "combo",
+    "image": "/images/combo-4-nguoi.jpg",
+    "popular": false,
+    "spicyLevel": 0,
+    "available": true
+  }
+]
