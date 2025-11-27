@@ -15,12 +15,16 @@ export default function MenuPage() {
   const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [priceRange, setPriceRange] = useState<string>("all");
+  const [spicyFilter, setSpicyFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("default");
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "warning" | "info";
   } | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     fetch("/api/menu")
@@ -37,43 +41,103 @@ export default function MenuPage() {
       });
   }, []);
 
-  const mainDishes = menuItems.filter((item) => item.category === "main");
-  const sideDishes = menuItems.filter((item) => item.category === "side");
-  const drinks = menuItems.filter((item) => item.category === "drink");
-  const desserts = menuItems.filter((item) => item.category === "dessert");
-  const combos = menuItems.filter((item) => item.category === "combo");
-
+  // Apply all filters
   const getFilteredItems = () => {
-    let filtered = mainDishes;
+    let filtered = [...menuItems];
 
+    // Category filter
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((item) => item.category === categoryFilter);
+    }
+
+    // Search filter
     if (searchQuery) {
-      filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          item.description.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
-    if (categoryFilter !== "all") {
-      if (categoryFilter === "popular") {
-        filtered = filtered.filter((item) => item.popular);
-      } else if (categoryFilter === "spicy") {
-        filtered = filtered.filter(
-          (item) => item.spicyLevel && item.spicyLevel >= 4
-        );
+    // Price range filter
+    if (priceRange !== "all") {
+      switch (priceRange) {
+        case "under50":
+          filtered = filtered.filter((item) => item.price < 50000);
+          break;
+        case "50-100":
+          filtered = filtered.filter(
+            (item) => item.price >= 50000 && item.price <= 100000
+          );
+          break;
+        case "100-200":
+          filtered = filtered.filter(
+            (item) => item.price > 100000 && item.price <= 200000
+          );
+          break;
+        case "over200":
+          filtered = filtered.filter((item) => item.price > 200000);
+          break;
       }
+    }
+
+    // Spicy level filter
+    if (spicyFilter !== "all") {
+      switch (spicyFilter) {
+        case "mild":
+          filtered = filtered.filter(
+            (item) => !item.spicyLevel || item.spicyLevel <= 2
+          );
+          break;
+        case "medium":
+          filtered = filtered.filter(
+            (item) => item.spicyLevel && item.spicyLevel >= 3 && item.spicyLevel <= 4
+          );
+          break;
+        case "hot":
+          filtered = filtered.filter(
+            (item) => item.spicyLevel && item.spicyLevel >= 5
+          );
+          break;
+      }
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case "price-asc":
+        filtered.sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        filtered.sort((a, b) => b.price - a.price);
+        break;
+      case "name":
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+      case "popular":
+        filtered.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
+        break;
+      default:
+        // Keep default order
+        break;
     }
 
     return filtered;
   };
 
-  // Helper function to determine which sections to show based on filter
-  const shouldShowSection = (
-    section: "main" | "side" | "drinks" | "desserts" | "combos"
-  ) => {
-    if (categoryFilter === "all") return true;
-    if (categoryFilter === "combo") return section === "combos";
-    if (categoryFilter === "side") return section === "side";
-    // For popular/spicy filters, show main dishes only
-    return section === "main";
+  const filteredItems = getFilteredItems();
+  const hasActiveFilters = 
+    categoryFilter !== "all" || 
+    priceRange !== "all" || 
+    spicyFilter !== "all" || 
+    searchQuery !== "" ||
+    sortBy !== "default";
+
+  const clearAllFilters = () => {
+    setCategoryFilter("all");
+    setPriceRange("all");
+    setSpicyFilter("all");
+    setSearchQuery("");
+    setSortBy("default");
   };
 
   const handleViewDetail = (item: MenuItem) => {
@@ -124,8 +188,8 @@ export default function MenuPage() {
 
               {/* Search & Filter */}
               <div className="bg-white rounded-2xl shadow-lg p-6 mb-12">
-                <div className="flex flex-col md:flex-row gap-4">
-                  {/* Search */}
+                {/* Search Bar */}
+                <div className="flex flex-col md:flex-row gap-4 mb-4">
                   <div className="flex-1 relative">
                     <Search
                       className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
@@ -133,40 +197,188 @@ export default function MenuPage() {
                     />
                     <input
                       type="text"
-                      placeholder="Tìm món ăn..."
+                      placeholder="Tìm món ăn theo tên hoặc mô tả..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-hue-red outline-none transition"
                     />
                   </div>
-
-                  {/* Filter */}
-                  <div className="flex gap-2 items-center">
-                    <Filter size={20} className="text-gray-500" />
-                    <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-hue-red outline-none transition"
-                    >
-                      <option value="all">Tất cả</option>
-                      <option value="combo">🎁 Combo Tiết Kiệm</option>
-                      <option value="popular">Bán chạy</option>
-                      <option value="spicy">Cay nồng</option>
-                      <option value="side">Món phụ</option>
-                    </select>
-                  </div>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl border-2 transition ${
+                      hasActiveFilters
+                        ? "bg-hue-red text-white border-hue-red"
+                        : "bg-white text-gray-700 border-gray-300 hover:border-hue-red"
+                    }`}
+                  >
+                    <Filter size={20} />
+                    <span className="font-semibold">Bộ lọc</span>
+                    {hasActiveFilters && (
+                      <span className="bg-white text-hue-red rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
+                        •
+                      </span>
+                    )}
+                  </button>
                 </div>
+
+                {/* Advanced Filters */}
+                {showFilters && (
+                  <div className="pt-4 border-t border-gray-200 animate-fadeIn">
+                    <div className="grid md:grid-cols-4 gap-4 mb-4">
+                      {/* Category Filter */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Danh mục
+                        </label>
+                        <select
+                          value={categoryFilter}
+                          onChange={(e) => setCategoryFilter(e.target.value)}
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+                        >
+                          <option value="all">Tất cả món</option>
+                          <option value="main">🍜 Bún bò</option>
+                          <option value="combo">🎁 Combo</option>
+                          <option value="side">🍲 Món phụ</option>
+                          <option value="drink">🥤 Đồ uống</option>
+                          <option value="dessert">🍮 Tráng miệng</option>
+                        </select>
+                      </div>
+
+                      {/* Price Range Filter */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Khoảng giá
+                        </label>
+                        <select
+                          value={priceRange}
+                          onChange={(e) => setPriceRange(e.target.value)}
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+                        >
+                          <option value="all">Tất cả</option>
+                          <option value="under50">Dưới 50K</option>
+                          <option value="50-100">50K - 100K</option>
+                          <option value="100-200">100K - 200K</option>
+                          <option value="over200">Trên 200K</option>
+                        </select>
+                      </div>
+
+                      {/* Spicy Level Filter */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Độ cay
+                        </label>
+                        <select
+                          value={spicyFilter}
+                          onChange={(e) => setSpicyFilter(e.target.value)}
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+                        >
+                          <option value="all">Tất cả</option>
+                          <option value="mild">🟢 Nhẹ (0-2)</option>
+                          <option value="medium">🟡 Vừa (3-4)</option>
+                          <option value="hot">🔴 Cay (5+)</option>
+                        </select>
+                      </div>
+
+                      {/* Sort By */}
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Sắp xếp
+                        </label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+                        >
+                          <option value="default">Mặc định</option>
+                          <option value="popular">Phổ biến</option>
+                          <option value="price-asc">Giá: Thấp → Cao</option>
+                          <option value="price-desc">Giá: Cao → Thấp</option>
+                          <option value="name">Tên A-Z</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Clear Filters Button */}
+                    {hasActiveFilters && (
+                      <div className="flex justify-end">
+                        <button
+                          onClick={clearAllFilters}
+                          className="text-sm text-hue-red hover:text-hue-redDark font-semibold flex items-center gap-2"
+                        >
+                          <span>✕</span>
+                          Xóa tất cả bộ lọc
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Active Filters Display */}
+                {hasActiveFilters && !showFilters && (
+                  <div className="pt-4 border-t border-gray-200">
+                    <div className="flex flex-wrap gap-2">
+                      {categoryFilter !== "all" && (
+                        <span className="px-3 py-1 bg-hue-cream text-hue-red rounded-full text-sm font-semibold flex items-center gap-2">
+                          Danh mục: {categoryFilter}
+                          <button
+                            onClick={() => setCategoryFilter("all")}
+                            className="hover:text-hue-redDark"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      )}
+                      {priceRange !== "all" && (
+                        <span className="px-3 py-1 bg-hue-cream text-hue-red rounded-full text-sm font-semibold flex items-center gap-2">
+                          Giá: {priceRange}
+                          <button
+                            onClick={() => setPriceRange("all")}
+                            className="hover:text-hue-redDark"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      )}
+                      {spicyFilter !== "all" && (
+                        <span className="px-3 py-1 bg-hue-cream text-hue-red rounded-full text-sm font-semibold flex items-center gap-2">
+                          Độ cay: {spicyFilter}
+                          <button
+                            onClick={() => setSpicyFilter("all")}
+                            className="hover:text-hue-redDark"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      )}
+                      {searchQuery && (
+                        <span className="px-3 py-1 bg-hue-cream text-hue-red rounded-full text-sm font-semibold flex items-center gap-2">
+                          Tìm: "{searchQuery}"
+                          <button
+                            onClick={() => setSearchQuery("")}
+                            className="hover:text-hue-redDark"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Combos */}
-              {shouldShowSection("combos") && combos.length > 0 && (
+              {/* Results Summary */}
+              <div className="mb-6 flex items-center justify-between">
+                <p className="text-gray-600">
+                  Tìm thấy <span className="font-bold text-hue-red">{filteredItems.length}</span> món ăn
+                  {hasActiveFilters && " phù hợp với bộ lọc"}
+                </p>
+              </div>
+
+              {/* Filtered Results */}
+              {filteredItems.length > 0 ? (
                 <section className="mb-16">
-                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                    <span className="text-4xl">🎁</span>
-                    Combo Tiết Kiệm
-                  </h2>
                   <div className="grid md:grid-cols-3 gap-6">
-                    {combos.map((item) => (
+                    {filteredItems.map((item) => (
                       <MenuCard
                         key={item.id}
                         item={item}
@@ -175,87 +387,24 @@ export default function MenuPage() {
                     ))}
                   </div>
                 </section>
-              )}
-
-              {/* Main Dishes */}
-              {shouldShowSection("main") && (
-                <section className="mb-16">
-                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                    <span className="text-4xl">🍜</span>
-                    Bún Bò Huế
-                  </h2>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {getFilteredItems().map((item) => (
-                      <MenuCard
-                        key={item.id}
-                        item={item}
-                        onViewDetail={handleViewDetail}
-                      />
-                    ))}
-                  </div>
-                  {getFilteredItems().length === 0 && (
-                    <div className="text-center py-12 text-gray-500">
-                      Không tìm thấy món ăn phù hợp
-                    </div>
+              ) : (
+                <div className="text-center py-20">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <h3 className="text-2xl font-bold text-gray-700 mb-2">
+                    Không tìm thấy món ăn
+                  </h3>
+                  <p className="text-gray-500 mb-6">
+                    Thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác
+                  </p>
+                  {hasActiveFilters && (
+                    <button
+                      onClick={clearAllFilters}
+                      className="px-6 py-3 bg-hue-red text-white rounded-lg hover:bg-hue-redDark transition font-semibold"
+                    >
+                      Xóa tất cả bộ lọc
+                    </button>
                   )}
-                </section>
-              )}
-
-              {/* Side Dishes */}
-              {shouldShowSection("side") && sideDishes.length > 0 && (
-                <section className="mb-16">
-                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                    <span className="text-4xl">🍲</span>
-                    Các Món Phụ
-                  </h2>
-                  <div className="grid md:grid-cols-4 gap-6">
-                    {sideDishes.map((item) => (
-                      <MenuCard
-                        key={item.id}
-                        item={item}
-                        onViewDetail={handleViewDetail}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Drinks */}
-              {shouldShowSection("drinks") && drinks.length > 0 && (
-                <section className="mb-16">
-                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                    <span className="text-4xl">🥤</span>
-                    Đồ Uống
-                  </h2>
-                  <div className="grid md:grid-cols-4 gap-6">
-                    {drinks.map((item) => (
-                      <MenuCard
-                        key={item.id}
-                        item={item}
-                        onViewDetail={handleViewDetail}
-                      />
-                    ))}
-                  </div>
-                </section>
-              )}
-
-              {/* Desserts */}
-              {shouldShowSection("desserts") && desserts.length > 0 && (
-                <section className="mb-16">
-                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                    <span className="text-4xl">🍮</span>
-                    Tráng Miệng
-                  </h2>
-                  <div className="grid md:grid-cols-4 gap-6">
-                    {desserts.map((item) => (
-                      <MenuCard
-                        key={item.id}
-                        item={item}
-                        onViewDetail={handleViewDetail}
-                      />
-                    ))}
-                  </div>
-                </section>
+                </div>
               )}
             </>
           )}
