@@ -1,9 +1,11 @@
 # Hướng dẫn cập nhật Database trên Railway
 
 ## Vấn đề
+
 Database hiện tại bị lỗi encoding tiếng Việt khi deploy lên Railway/Vercel.
 
 ## Giải pháp
+
 Đã tạo file SQL mới với encoding UTF8MB4 đầy đủ: `database/bun_bo_hue_co_do_railway.sql`
 
 ## Cách cập nhật Database trên Railway
@@ -11,11 +13,13 @@ Database hiện tại bị lỗi encoding tiếng Việt khi deploy lên Railway
 ### Phương án 1: Sử dụng Railway Dashboard (KHUYẾN NGHỊ)
 
 1. **Truy cập Railway Dashboard**:
+
    - Vào https://railway.app/
    - Chọn project của bạn
    - Click vào MySQL service
 
 2. **Mở MySQL Query Editor**:
+
    - Click tab "Query" hoặc "Data"
    - Hoặc click "Connect" để lấy thông tin kết nối
 
@@ -29,6 +33,7 @@ Database hiện tại bị lỗi encoding tiếng Việt khi deploy lên Railway
 1. **Tải MySQL Workbench**: https://dev.mysql.com/downloads/workbench/
 
 2. **Kết nối đến Railway**:
+
    ```
    Host: nozomi.proxy.rlwy.net
    Port: 53540
@@ -82,13 +87,14 @@ SELECT * FROM menu_items LIMIT 5;
 SELECT * FROM settings;
 
 -- Kiểm tra số lượng records
-SELECT 
+SELECT
     (SELECT COUNT(*) FROM menu_items) as menu_count,
     (SELECT COUNT(*) FROM coupons) as coupon_count,
     (SELECT COUNT(*) FROM users) as user_count;
 ```
 
 Kết quả mong đợi:
+
 - ✅ Tiếng Việt hiển thị đúng (không bị ��� hoặc ???)
 - ✅ Có ít nhất 20 menu items
 - ✅ Có 5 coupons
@@ -97,11 +103,14 @@ Kết quả mong đợi:
 ## Thông tin quan trọng
 
 ### Admin Login
+
 - Username: `admin`
 - Password: `admin123`
 
 ### Test Database
+
 Sau khi import, test bằng cách:
+
 1. Restart Next.js local: `npm run dev`
 2. Truy cập http://localhost:3000
 3. Kiểm tra menu có hiển thị tiếng Việt đúng không
@@ -124,16 +133,19 @@ git push origin main
 ## Troubleshooting
 
 ### Lỗi: "Access denied"
+
 - Kiểm tra lại password trong `.env.local`
 - Đảm bảo Railway MySQL service đang chạy
 - Thử reset password từ Railway Dashboard
 
 ### Lỗi: "Connection timeout"
+
 - Kiểm tra firewall/antivirus
 - Thử kết nối từ mạng khác
 - Kiểm tra Railway service status
 
 ### Tiếng Việt vẫn bị lỗi
+
 - Đảm bảo đã import file `bun_bo_hue_co_do_railway.sql` (không phải file cũ)
 - Check encoding của database: `SHOW CREATE DATABASE railway;`
 - Phải là: `CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
@@ -156,6 +168,7 @@ git push origin main
 ---
 
 **Lưu ý**: File SQL mới đã loại bỏ dữ liệu test (orders, logs) để database sạch sẽ. Chỉ giữ lại:
+
 - Menu items (21 món)
 - Coupons (5 mã)
 - Settings cơ bản
