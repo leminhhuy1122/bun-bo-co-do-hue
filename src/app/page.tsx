@@ -365,7 +365,7 @@ export default function HomePage() {
                   <div className="mt-2 sm:mt-3 w-12 h-1 bg-white/40 group-hover:w-full transition-all duration-300"></div>
                 </div>
 
-                <div className="group bg-gradient-to-br from-yellow-500 to-orange-600 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">on-all duration-300">
+                <div className="group bg-gradient-to-br from-yellow-500 to-orange-600 p-4 sm:p-6 md:p-8 rounded-xl sm:rounded-2xl text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                   <div className="flex items-center justify-center gap-1 mb-1 sm:mb-2">
                     <Star size={18} fill="currentColor" className="sm:hidden" />
                     <Star size={24} fill="currentColor" className="hidden sm:block md:hidden" />
