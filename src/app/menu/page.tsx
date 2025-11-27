@@ -91,7 +91,8 @@ export default function MenuPage() {
           break;
         case "medium":
           filtered = filtered.filter(
-            (item) => item.spicyLevel && item.spicyLevel >= 3 && item.spicyLevel <= 4
+            (item) =>
+              item.spicyLevel && item.spicyLevel >= 3 && item.spicyLevel <= 4
           );
           break;
         case "hot":
@@ -125,10 +126,10 @@ export default function MenuPage() {
   };
 
   const filteredItems = getFilteredItems();
-  const hasActiveFilters = 
-    categoryFilter !== "all" || 
-    priceRange !== "all" || 
-    spicyFilter !== "all" || 
+  const hasActiveFilters =
+    categoryFilter !== "all" ||
+    priceRange !== "all" ||
+    spicyFilter !== "all" ||
     searchQuery !== "" ||
     sortBy !== "default";
 
@@ -369,7 +370,11 @@ export default function MenuPage() {
               {/* Results Summary */}
               <div className="mb-6 flex items-center justify-between">
                 <p className="text-gray-600">
-                  Tìm thấy <span className="font-bold text-hue-red">{filteredItems.length}</span> món ăn
+                  Tìm thấy{" "}
+                  <span className="font-bold text-hue-red">
+                    {filteredItems.length}
+                  </span>{" "}
+                  món ăn
                   {hasActiveFilters && " phù hợp với bộ lọc"}
                 </p>
               </div>

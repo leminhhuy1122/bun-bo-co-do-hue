@@ -55,8 +55,8 @@ export default function Hero() {
 
             <div className="relative z-10 rounded-xl overflow-hidden shadow-2xl shadow-orange-500/50 border-2 border-orange-400/30">
               <img
-                src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&h=600&fit=crop"
-                alt="Bún Bò Huế"
+                src="/images/bun-bo-dac-biet-2.jpg"
+                alt="Bún Bò Huế Cổ Đô"
                 className="w-full h-[40vh] object-cover"
               />
               {/* Steam effect overlay */}
@@ -209,8 +209,8 @@ export default function Hero() {
 
             <div className="relative z-10 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl shadow-orange-500/50 transform hover:scale-105 md:hover:rotate-1 transition-all duration-500 border-3 lg:border-4 border-orange-400/30">
               <img
-                src="https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=800&h=600&fit=crop"
-                alt="Bún Bò Huế"
+                src="/images/bun-bo-dac-biet-2.jpg"
+                alt="Bún Bò Huế Cổ Đô"
                 className="w-full h-[380px] lg:h-[480px] object-cover"
               />
               {/* Steam effect overlay */}

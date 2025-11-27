@@ -9,7 +9,7 @@ Thư mục này chứa các scripts và migrations cho database của dự án B
 #### `railway_complete.sql`
 
 - **Mô tả**: Database dump hoàn chỉnh tối ưu cho Railway MySQL 8.0+
-- **Bao gồm**: 
+- **Bao gồm**:
   - Schema đầy đủ (17 tables)
   - Sample data (admin, menu, coupons)
   - UTF8MB4 encoding
