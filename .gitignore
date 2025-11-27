@@ -33,6 +33,7 @@ yarn-error.log*
 
 # Database backups
 *.sql
+!database/bun_bo_hue_co_do_railway.sql
 database-backup.sql
 
 # Scripts
