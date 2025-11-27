@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tag, X, Copy, Check } from "lucide-react";
 
 interface CouponInputProps {
@@ -9,6 +9,12 @@ interface CouponInputProps {
   onRemoveCoupon: () => void;
   error?: string;
   isValidating?: boolean;
+}
+
+interface SuggestedCoupon {
+  code: string;
+  description: string;
+  discount: string;
 }
 
 export default function CouponInput({
@@ -21,29 +27,29 @@ export default function CouponInput({
   const [couponCode, setCouponCode] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [copied, setCopied] = useState("");
+  const [suggestedCoupons, setSuggestedCoupons] = useState<SuggestedCoupon[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
 
-  const suggestedCoupons = [
-    {
-      code: "WELCOME2024",
-      description: "Giảm 20% cho khách mới (đơn từ 100K)",
-      discount: "20%",
-    },
-    {
-      code: "COMBO50K",
-      description: "Giảm 50K cho đơn từ 200K",
-      discount: "50K",
-    },
-    {
-      code: "FREESHIP",
-      description: "Miễn phí ship (đơn từ 150K)",
-      discount: "20K",
-    },
-    {
-      code: "HAPPYHOUR",
-      description: "Giảm 15% từ 14h-16h (đơn từ 50K)",
-      discount: "15%",
-    },
-  ];
+  useEffect(() => {
+    // Fetch suggested coupons from API
+    const fetchSuggestions = async () => {
+      try {
+        const response = await fetch("/api/coupons/suggestions");
+        const data = await response.json();
+        if (data.success) {
+          setSuggestedCoupons(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching coupon suggestions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuggestions();
+  }, []);
 
   const handleApply = () => {
     if (couponCode.trim()) {
@@ -101,40 +107,53 @@ export default function CouponInput({
                 </button>
               </div>
               <div className="p-2">
-                {suggestedCoupons.map((coupon) => (
-                  <div
-                    key={coupon.code}
-                    className="p-3 hover:bg-hue-cream rounded-lg cursor-pointer transition group"
-                    onClick={() => handleQuickApply(coupon.code)}
-                  >
-                    <div className="flex justify-between items-start mb-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-hue-red">
-                          {coupon.code}
-                        </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyCode(coupon.code);
-                          }}
-                          className="opacity-0 group-hover:opacity-100 transition"
-                        >
-                          {copied === coupon.code ? (
-                            <Check size={14} className="text-green-600" />
-                          ) : (
-                            <Copy size={14} className="text-gray-500" />
-                          )}
-                        </button>
-                      </div>
-                      <span className="bg-hue-gold text-hue-redDark text-xs px-2 py-1 rounded-full font-bold">
-                        {coupon.discount}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      {coupon.description}
-                    </p>
+                {loading ? (
+                  <div className="p-4 text-center text-gray-500">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-hue-red border-t-transparent mx-auto mb-2"></div>
+                    <span className="text-sm">Đang tải...</span>
                   </div>
-                ))}
+                ) : suggestedCoupons.length === 0 ? (
+                  <div className="p-4 text-center text-gray-500">
+                    <span className="text-sm">
+                      Không có mã giảm giá khả dụng
+                    </span>
+                  </div>
+                ) : (
+                  suggestedCoupons.map((coupon) => (
+                    <div
+                      key={coupon.code}
+                      className="p-3 hover:bg-hue-cream rounded-lg cursor-pointer transition group"
+                      onClick={() => handleQuickApply(coupon.code)}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-hue-red">
+                            {coupon.code}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyCode(coupon.code);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 transition"
+                          >
+                            {copied === coupon.code ? (
+                              <Check size={14} className="text-green-600" />
+                            ) : (
+                              <Copy size={14} className="text-gray-500" />
+                            )}
+                          </button>
+                        </div>
+                        <span className="bg-hue-gold text-hue-redDark text-xs px-2 py-1 rounded-full font-bold">
+                          {coupon.discount}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600">
+                        {coupon.description}
+                      </p>
+                    </div>
+                  ))
+                )}
               </div>
               <div className="p-3 bg-gray-50 border-t text-center">
                 <p className="text-xs text-gray-500">

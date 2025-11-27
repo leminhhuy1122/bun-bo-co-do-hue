@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
         min_order_amount, max_discount_amount, usage_limit, used_count,
         valid_from, valid_until, is_active,
         show_in_popup, popup_priority, popup_badge, popup_gradient,
+        show_in_suggestions, suggestion_priority, suggestion_badge,
         created_at, updated_at
       FROM coupons WHERE 1=1
     `;
@@ -68,8 +69,9 @@ export async function POST(request: NextRequest) {
       INSERT INTO coupons (
         code, description, discount_type, discount_value,
         min_order_amount, max_discount_amount, usage_limit, valid_until,
-        show_in_popup, popup_priority, popup_badge, popup_gradient
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        show_in_popup, popup_priority, popup_badge, popup_gradient,
+        show_in_suggestions, suggestion_priority, suggestion_badge
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     await query(sql, [
@@ -85,6 +87,9 @@ export async function POST(request: NextRequest) {
       popup_priority || 999,
       popup_badge || null,
       popup_gradient || null,
+      body.show_in_suggestions || false,
+      body.suggestion_priority || 999,
+      body.suggestion_badge || null,
     ]);
 
     return NextResponse.json({

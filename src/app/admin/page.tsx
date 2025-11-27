@@ -2739,6 +2739,9 @@ function CouponsTab({
     popup_priority: 999,
     popup_badge: "",
     popup_gradient: "",
+    show_in_suggestions: false,
+    suggestion_priority: 999,
+    suggestion_badge: "",
   });
 
   useEffect(() => {
@@ -2780,6 +2783,9 @@ function CouponsTab({
       popup_priority: 999,
       popup_badge: "",
       popup_gradient: "",
+      show_in_suggestions: false,
+      suggestion_priority: 999,
+      suggestion_badge: "",
     });
     setShowAddModal(true);
   };
@@ -2802,6 +2808,9 @@ function CouponsTab({
       popup_priority: coupon.popup_priority || 999,
       popup_badge: coupon.popup_badge || "",
       popup_gradient: coupon.popup_gradient || "",
+      show_in_suggestions: Boolean(coupon.show_in_suggestions),
+      suggestion_priority: coupon.suggestion_priority || 999,
+      suggestion_badge: coupon.suggestion_badge || "",
     });
     setShowAddModal(true);
   };
@@ -3412,6 +3421,84 @@ function CouponsTab({
                             style={{ background: formData.popup_gradient }}
                           />
                         )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Suggestion Management Section */}
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-4">
+                    💡 Quản lý Gợi Ý Thanh Toán
+                  </h3>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <input
+                      type="checkbox"
+                      id="show_in_suggestions"
+                      checked={formData.show_in_suggestions}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          show_in_suggestions: e.target.checked,
+                        })
+                      }
+                      className="w-5 h-5 text-hue-red focus:ring-hue-red border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="show_in_suggestions"
+                      className="text-sm font-semibold text-gray-700"
+                    >
+                      Hiển thị trong gợi ý trang thanh toán
+                    </label>
+                  </div>
+
+                  {formData.show_in_suggestions && (
+                    <div className="space-y-4 pl-8">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Thứ tự ưu tiên
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.suggestion_priority}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                suggestion_priority:
+                                  parseInt(e.target.value) || 999,
+                              })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                            min="1"
+                            placeholder="1 = Ưu tiên cao nhất"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Số nhỏ = hiển thị trước
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Nhãn hiển thị
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.suggestion_badge}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                suggestion_badge: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                            placeholder="-20%, -50K, FREE"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Tự động nếu để trống
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}

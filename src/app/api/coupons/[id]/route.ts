@@ -46,6 +46,9 @@ export async function PUT(
           popup_priority = ?,
           popup_badge = ?,
           popup_gradient = ?,
+          show_in_suggestions = ?,
+          suggestion_priority = ?,
+          suggestion_badge = ?,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
@@ -62,6 +65,9 @@ export async function PUT(
       updatedData.popup_priority || 999,
       updatedData.popup_badge || null,
       updatedData.popup_gradient || null,
+      updatedData.show_in_suggestions || false,
+      updatedData.suggestion_priority || 999,
+      updatedData.suggestion_badge || null,
       id,
     ]);
 
