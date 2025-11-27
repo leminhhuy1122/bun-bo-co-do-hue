@@ -1,4 +1,16 @@
-// Run database migration to add suggestion columns
+/**
+ * Database Migration Script
+ * Add suggestion management columns to coupons table
+ *
+ * This script adds three new columns:
+ * - show_in_suggestions: Boolean flag to control visibility
+ * - suggestion_priority: Integer for ordering (1 = highest priority)
+ * - suggestion_badge: Custom display label (e.g., "-20%", "HOT")
+ *
+ * Usage: node database/run-migration.js
+ * Date: 2025-11-27
+ */
+
 const mysql = require("mysql2/promise");
 require("dotenv").config({ path: ".env.local" });
 
@@ -8,7 +20,7 @@ async function runMigration() {
   try {
     console.log("🔄 Connecting to Railway database...");
 
-    // Create connection
+    // Create database connection
     connection = await mysql.createConnection({
       host: process.env.DB_HOST,
       port: process.env.DB_PORT,
@@ -19,15 +31,16 @@ async function runMigration() {
 
     console.log("✅ Connected successfully!\n");
 
-    // Check if columns already exist
+    // Check if columns already exist to avoid duplicate migration
     console.log("🔍 Checking if columns already exist...");
-    const [columns] = await connection.query(`
-      SELECT COLUMN_NAME 
-      FROM INFORMATION_SCHEMA.COLUMNS 
-      WHERE TABLE_SCHEMA = '${process.env.DB_NAME}' 
-        AND TABLE_NAME = 'coupons'
-        AND COLUMN_NAME IN ('show_in_suggestions', 'suggestion_priority', 'suggestion_badge')
-    `);
+    const [columns] = await connection.query(
+      `SELECT COLUMN_NAME 
+       FROM INFORMATION_SCHEMA.COLUMNS 
+       WHERE TABLE_SCHEMA = ? 
+         AND TABLE_NAME = 'coupons'
+         AND COLUMN_NAME IN ('show_in_suggestions', 'suggestion_priority', 'suggestion_badge')`,
+      [process.env.DB_NAME]
+    );
 
     if (columns.length > 0) {
       console.log("⚠️  Columns already exist:");

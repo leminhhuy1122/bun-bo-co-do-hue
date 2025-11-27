@@ -1,4 +1,17 @@
-// Enable some existing coupons to show in suggestions
+/**
+ * Enable Coupon Suggestions Script
+ * Automatically enable active coupons to show in checkout suggestions
+ *
+ * Features:
+ * - Fetches up to 6 most recent active coupons
+ * - Auto-assigns priority (1-6)
+ * - Auto-generates badge labels based on discount type
+ * - Updates show_in_suggestions flag to TRUE
+ *
+ * Usage: node database/enable-suggestions.js
+ * Date: 2025-11-27
+ */
+
 const mysql = require("mysql2/promise");
 require("dotenv").config({ path: ".env.local" });
 
@@ -47,12 +60,16 @@ async function enableSuggestions() {
       const coupon = coupons[i];
       const priority = i + 1; // 1, 2, 3, ...
 
-      // Auto-generate badge if not exists
+      // Auto-generate badge based on discount type
       let badge = "";
       if (coupon.discount_type === "percentage") {
-        badge = `-${coupon.discount_value}%`;
+        // Format: -10%, -15%, -20%
+        badge = `-${parseFloat(coupon.discount_value)}%`;
       } else {
-        badge = `-${Math.floor(coupon.discount_value / 1000)}K`;
+        // Format: -50K, -100K for fixed amounts
+        const valueInK = Math.floor(coupon.discount_value / 1000);
+        badge =
+          valueInK > 0 ? `-${valueInK}K` : `GIẢM ${coupon.discount_value}`;
       }
 
       await connection.query(
@@ -76,11 +93,15 @@ async function enableSuggestions() {
     console.log("🎉 Reload the checkout page to see them.\n");
   } catch (error) {
     console.error("❌ Error:", error.message);
+    console.error(error);
+    process.exit(1);
   } finally {
     if (connection) {
       await connection.end();
+      console.log("🔌 Database connection closed.");
     }
   }
 }
 
+// Run the script
 enableSuggestions();

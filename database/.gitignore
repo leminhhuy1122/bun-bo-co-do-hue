@@ -1,0 +1,12 @@
+# Database backups
+backup_*.sql
+*.backup.sql
+dump_*.sql
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local test data
+test_*.sql
+local_*.sql
