@@ -27,8 +27,8 @@ export async function GET(request: NextRequest) {
        LEFT JOIN orders o ON el.order_id = o.id
        LEFT JOIN reservations r ON el.reservation_id = r.id
        ORDER BY el.sent_at DESC
-       LIMIT ? OFFSET ?`,
-      [limit, offset]
+       LIMIT ${limit} OFFSET ${offset}`,
+      []
     );
 
     // Lấy thống kê

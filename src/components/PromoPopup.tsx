@@ -4,14 +4,46 @@ import { useState, useEffect } from "react";
 import { X, Tag } from "lucide-react";
 import Toast from "./Toast";
 
+interface Coupon {
+  id: number;
+  code: string;
+  description: string;
+  discount_type: "percentage" | "fixed";
+  discount_value: number;
+  min_order_amount: number;
+  max_discount_amount?: number;
+  popup_badge: string;
+  popup_gradient: string;
+  popup_priority: number;
+}
+
 export default function PromoPopup() {
   const [isOpen, setIsOpen] = useState(false);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "warning" | "info";
   } | null>(null);
 
   useEffect(() => {
+    // Fetch coupons from API
+    const fetchCoupons = async () => {
+      try {
+        const response = await fetch("/api/coupons/popup");
+        const data = await response.json();
+        if (data.success) {
+          setCoupons(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching popup coupons:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCoupons();
+
     // Show popup after 2 seconds
     const timer = setTimeout(() => {
       const hasSeenPopup = sessionStorage.getItem("promoPopupSeen");
@@ -34,7 +66,19 @@ export default function PromoPopup() {
     handleClose();
   };
 
-  if (!isOpen) return null;
+  const formatDescription = (coupon: Coupon) => {
+    if (coupon.discount_type === "percentage") {
+      return `Giảm ${coupon.discount_value}% cho đơn từ ${(
+        coupon.min_order_amount / 1000
+      ).toFixed(0)}K`;
+    } else {
+      return `Giảm ${(coupon.discount_value / 1000).toFixed(0)}K cho đơn từ ${(
+        coupon.min_order_amount / 1000
+      ).toFixed(0)}K`;
+    }
+  };
+
+  if (!isOpen || loading || coupons.length === 0) return null;
 
   return (
     <>
@@ -61,7 +105,7 @@ export default function PromoPopup() {
               <div
                 className="absolute inset-0"
                 style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                  backgroundImage: `url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M20 20l-1.5-4-1.5 4-4 1.5 4 1.5 1.5 4 1.5-4 4-1.5-4-1.5zm20 20l-2-5-2 5-5 2 5 2 2 5 2-5 5-2-5-2zm-20 20l-1.5-4-1.5 4-4 1.5 4 1.5 1.5 4 1.5-4 4-1.5-4-1.5zm40-20l-2-5-2 5-5 2 5 2 2 5 2-5 5-2-5-2zm-20-20l-1.5-4-1.5 4-4 1.5 4 1.5 1.5 4 1.5-4 4-1.5-4-1.5zm20 40l-1.5-4-1.5 4-4 1.5 4 1.5 1.5 4 1.5-4 4-1.5-4-1.5z'/%3E%3C/g%3E%3C/svg%3E")`,
                 }}
               ></div>
             </div>
@@ -75,61 +119,39 @@ export default function PromoPopup() {
           </div>
 
           {/* Content */}
-          <div className="p-8 space-y-4">
-            {/* Promo 1 */}
-            <div
-              className="border-2 border-hue-gold rounded-xl p-4 hover:shadow-lg transition cursor-pointer"
-              onClick={() => handleCopyCode("WELCOME2024")}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2 text-hue-red">
-                  <Tag size={20} />
-                  <span className="font-bold text-lg">WELCOME2024</span>
+          <div className="p-8 space-y-5">
+            {coupons.map((coupon) => (
+              <div
+                key={coupon.id}
+                className="relative overflow-hidden rounded-2xl p-6 cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl"
+                style={{
+                  background:
+                    coupon.popup_gradient ||
+                    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                }}
+                onClick={() => handleCopyCode(coupon.code)}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="bg-white/20 backdrop-blur-sm p-2 rounded-lg">
+                        <Tag size={20} className="text-white" />
+                      </div>
+                      <span className="font-bold text-xl text-white">
+                        {coupon.code}
+                      </span>
+                    </div>
+                    <span className="bg-gradient-to-r from-yellow-300 to-yellow-500 text-gray-900 px-4 py-2 rounded-full text-base font-bold shadow-lg">
+                      {coupon.popup_badge}
+                    </span>
+                  </div>
+                  <p className="text-white/90 text-sm font-medium">
+                    {coupon.description || formatDescription(coupon)}
+                  </p>
                 </div>
-                <span className="bg-hue-gold text-hue-redDark px-3 py-1 rounded-full text-sm font-bold">
-                  -20%
-                </span>
               </div>
-              <p className="text-gray-600 text-sm">
-                Giảm 20% cho khách hàng mới (đơn từ 100K)
-              </p>
-            </div>
-
-            {/* Promo 2 */}
-            <div
-              className="border-2 border-hue-gold rounded-xl p-4 hover:shadow-lg transition cursor-pointer"
-              onClick={() => handleCopyCode("COMBO50K")}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2 text-hue-red">
-                  <Tag size={20} />
-                  <span className="font-bold text-lg">COMBO50K</span>
-                </div>
-                <span className="bg-hue-gold text-hue-redDark px-3 py-1 rounded-full text-sm font-bold">
-                  -50K
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm">Giảm 50K cho đơn từ 200K</p>
-            </div>
-
-            {/* Promo 3 */}
-            <div
-              className="border-2 border-hue-gold rounded-xl p-4 hover:shadow-lg transition cursor-pointer"
-              onClick={() => handleCopyCode("HAPPYHOUR")}
-            >
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2 text-hue-red">
-                  <Tag size={20} />
-                  <span className="font-bold text-lg">HAPPYHOUR</span>
-                </div>
-                <span className="bg-hue-gold text-hue-redDark px-3 py-1 rounded-full text-sm font-bold">
-                  -15%
-                </span>
-              </div>
-              <p className="text-gray-600 text-sm">
-                Giảm 15% từ 14h-16h (đơn từ 50K)
-              </p>
-            </div>
+            ))}
 
             <p className="text-center text-sm text-gray-500 pt-4">
               👆 Click vào mã để sao chép

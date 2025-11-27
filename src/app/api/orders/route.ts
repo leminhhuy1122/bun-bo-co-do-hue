@@ -20,8 +20,7 @@ export async function GET(request: NextRequest) {
       params.push(status);
     }
 
-    sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?";
-    params.push(limit, offset);
+    sql += ` ORDER BY created_at DESC LIMIT ${limit} OFFSET ${offset}`;
 
     const orders = await query(sql, params);
 

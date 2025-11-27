@@ -6,7 +6,7 @@ export async function GET() {
   try {
     // Fetch all staff members (exclude password)
     const staff = await query(`
-      SELECT id, username, role, created_at
+      SELECT id, username, full_name, email, phone, role, status, created_at
       FROM users
       ORDER BY created_at DESC
     `);
@@ -30,7 +30,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { username, password, role } = body;
+    const { username, password, role, full_name, email, phone } = body;
 
     // Validate input
     if (!username || !password) {
@@ -62,16 +62,34 @@ export async function POST(request: NextRequest) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Set default values for required fields
+    const staffFullName = full_name || username;
+    const staffEmail = email || `${username}@bunbohuecodo.vn`;
+    const staffRole = role || "staff";
+
     // Insert new staff member
     const result = await query(
-      `INSERT INTO users (username, password, role) VALUES (?, ?, ?)`,
-      [username, hashedPassword, role || "staff"]
+      `INSERT INTO users (username, password, full_name, email, phone, role) VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        username,
+        hashedPassword,
+        staffFullName,
+        staffEmail,
+        phone || null,
+        staffRole,
+      ]
     );
 
     return NextResponse.json({
       success: true,
       message: "Staff member added successfully",
-      data: { id: (result as any).insertId, username, role: role || "staff" },
+      data: {
+        id: (result as any).insertId,
+        username,
+        full_name: staffFullName,
+        email: staffEmail,
+        role: staffRole,
+      },
     });
   } catch (error: any) {
     console.error("Error adding staff:", error);

@@ -16,6 +16,7 @@ import { Coupon } from "@/types";
 import CouponInput from "@/components/CouponInput";
 import SuccessModal from "@/components/SuccessModal";
 import Toast from "@/components/Toast";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function CheckoutPage() {
   const {
@@ -54,6 +55,7 @@ export default function CheckoutPage() {
     message: string;
     type: "success" | "error" | "warning" | "info";
   } | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const coupons = promosData as Coupon[];
 
@@ -155,11 +157,13 @@ export default function CheckoutPage() {
       return;
     }
 
-    // Validate email if provided
-    if (
-      customerInfo.email &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerInfo.email)
-    ) {
+    if (!customerInfo.email.trim()) {
+      showToast("Vui lòng nhập email!", "warning");
+      return;
+    }
+
+    // Validate email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerInfo.email)) {
       showToast("Email không hợp lệ!", "error");
       return;
     }
@@ -171,6 +175,7 @@ export default function CheckoutPage() {
     setOrderNumber(generatedOrderNumber);
 
     // Save order to database
+    setIsSubmitting(true);
     try {
       const orderData = {
         orderNumber: generatedOrderNumber,
@@ -226,6 +231,8 @@ export default function CheckoutPage() {
     } catch (error) {
       console.error("❌ Order error:", error);
       showToast("Lỗi khi đặt hàng. Vui lòng thử lại!", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -426,7 +433,8 @@ export default function CheckoutPage() {
                 />
                 <input
                   type="email"
-                  placeholder="Email"
+                  placeholder="Email *"
+                  required
                   value={customerInfo.email}
                   onChange={(e) =>
                     setCustomerInfo({ ...customerInfo, email: e.target.value })
@@ -546,9 +554,17 @@ export default function CheckoutPage() {
 
               <button
                 onClick={handlePlaceOrder}
-                className="w-full bg-hue-red text-white py-4 rounded-xl font-bold text-lg hover:bg-hue-redDark transition mt-6 shadow-lg hover:shadow-xl"
+                disabled={isSubmitting}
+                className="w-full bg-hue-red text-white py-4 rounded-xl font-bold text-lg hover:bg-hue-redDark transition mt-6 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                Đặt Hàng Ngay
+                {isSubmitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Đang xử lý...
+                  </>
+                ) : (
+                  "Đặt Hàng Ngay"
+                )}
               </button>
 
               <p className="text-xs text-gray-500 text-center mt-4">

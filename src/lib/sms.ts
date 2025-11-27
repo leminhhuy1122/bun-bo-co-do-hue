@@ -1,12 +1,14 @@
-// SMS Service - Tích hợp với các nhà cung cấp SMS như Twilio, SMSAPI, Viettel SMS, etc.
+// SMS Service - Tích hợp với Infobip (Global SMS Platform)
 
 interface SMSConfig {
-  provider: "twilio" | "viettel" | "vnpt" | "esms" | "speedsms";
-  accountSid?: string;
-  authToken?: string;
-  apiKey?: string;
-  secretKey?: string;
-  brandName?: string;
+  provider: "infobip" | "speedsms" | "esms";
+  apiKey?: string; // Infobip API Key
+  baseUrl?: string; // Infobip base URL
+  from?: string; // Sender ID
+  // Legacy configs
+  accessToken?: string; // SpeedSMS
+  secretKey?: string; // eSMS
+  brandName?: string; // eSMS
 }
 
 interface SMSMessage {
@@ -17,10 +19,14 @@ interface SMSMessage {
 
 // Cấu hình SMS (trong thực tế nên lưu trong biến môi trường)
 const SMS_CONFIG: SMSConfig = {
-  provider: "esms", // Sử dụng eSMS - popular ở VN
-  apiKey: process.env.ESMS_API_KEY || "YOUR_API_KEY",
-  secretKey: process.env.ESMS_SECRET_KEY || "YOUR_SECRET_KEY",
-  brandName: process.env.SMS_BRAND_NAME || "Baotrixemay",
+  provider: (process.env.SMS_PROVIDER as any) || "infobip",
+  apiKey: process.env.INFOBIP_API_KEY || "YOUR_API_KEY",
+  baseUrl: process.env.INFOBIP_BASE_URL || "https://api.infobip.com",
+  from: process.env.INFOBIP_SENDER || "InfoSMS", // Sender ID
+  // Legacy configs (fallback)
+  accessToken: process.env.SPEEDSMS_ACCESS_TOKEN,
+  secretKey: process.env.ESMS_SECRET_KEY,
+  brandName: process.env.SMS_BRAND_NAME || "",
 };
 
 /**
@@ -176,22 +182,31 @@ function generateOrderStatusMessage(
 }
 
 /**
- * Format số điện thoại (loại bỏ ký tự đặc biệt, thêm +84)
+ * Format số điện thoại cho các nhà cung cấp SMS
+ * Infobip: yêu cầu format +84xxxxxxxxx (E.164)
+ * SpeedSMS: chấp nhận 84xxxxxxxxx hoặc 0xxxxxxxxx
+ * eSMS: chỉ chấp nhận 84xxxxxxxxx
  */
 function formatPhoneNumber(phone: string): string {
   // Loại bỏ tất cả ký tự không phải số
   let cleaned = phone.replace(/\D/g, "");
 
-  // Nếu bắt đầu bằng 0, thay bằng 84
+  // Nếu bắt đầu bằng 0, chuyển thành 84
   if (cleaned.startsWith("0")) {
     cleaned = "84" + cleaned.slice(1);
   }
 
-  // Thêm + nếu chưa có
-  if (!cleaned.startsWith("+")) {
-    cleaned = "+" + cleaned;
+  // Nếu chưa có 84 ở đầu, thêm vào
+  if (!cleaned.startsWith("84")) {
+    cleaned = "84" + cleaned;
   }
 
+  // Infobip yêu cầu có dấu + ở đầu (E.164 format)
+  if (SMS_CONFIG.provider === "infobip") {
+    return "+" + cleaned;
+  }
+
+  // Các provider khác không cần +
   return cleaned;
 }
 
@@ -199,19 +214,35 @@ function formatPhoneNumber(phone: string): string {
  * Gửi SMS qua nhà cung cấp
  */
 async function sendSMS(data: SMSMessage): Promise<any> {
-  // Kiểm tra nếu có API key thì gửi thật, không thì simulation
-  const hasApiKey = SMS_CONFIG.apiKey && SMS_CONFIG.apiKey !== "YOUR_API_KEY";
+  const provider = SMS_CONFIG.provider;
+
+  // Kiểm tra credentials theo provider
+  const hasCredentials =
+    (provider === "infobip" &&
+      SMS_CONFIG.apiKey &&
+      SMS_CONFIG.apiKey !== "YOUR_API_KEY") ||
+    (provider === "speedsms" &&
+      SMS_CONFIG.accessToken &&
+      SMS_CONFIG.accessToken !== "YOUR_ACCESS_TOKEN") ||
+    (provider === "esms" &&
+      SMS_CONFIG.apiKey &&
+      SMS_CONFIG.apiKey !== "YOUR_API_KEY");
 
   // Kiểm tra biến SMS_ENABLED để cho phép gửi SMS thật trong development
   const smsEnabled = process.env.SMS_ENABLED === "true";
 
-  if (!hasApiKey) {
-    console.log("📱 [SMS SIMULATION - Không có API Key]", {
+  if (!hasCredentials) {
+    console.log("📱 [SMS SIMULATION - Không có credentials]", {
       to: data.to,
       message: data.message,
       type: data.type,
-      provider: SMS_CONFIG.provider,
-      note: "Để gửi SMS thật, hãy thêm ESMS_API_KEY vào .env.local",
+      provider,
+      note:
+        provider === "infobip"
+          ? "Để gửi SMS thật, hãy thêm INFOBIP_API_KEY vào .env.local"
+          : provider === "speedsms"
+          ? "Để gửi SMS thật, hãy thêm SPEEDSMS_ACCESS_TOKEN vào .env.local"
+          : "Để gửi SMS thật, hãy thêm ESMS_API_KEY vào .env.local",
     });
 
     // Giả lập delay của API call
@@ -230,7 +261,7 @@ async function sendSMS(data: SMSMessage): Promise<any> {
       to: data.to,
       message: data.message,
       type: data.type,
-      provider: SMS_CONFIG.provider,
+      provider,
       note: "Để gửi SMS thật, hãy set SMS_ENABLED=true trong .env.local",
     });
 
@@ -245,23 +276,156 @@ async function sendSMS(data: SMSMessage): Promise<any> {
     };
   }
 
-  // GỬI SMS THẬT qua eSMS
-  try {
-    // Kiểm tra brandname hợp lệ (không rỗng và không phải giá trị mặc định)
-    const hasBrandname =
-      SMS_CONFIG.brandName &&
-      SMS_CONFIG.brandName !== "" &&
-      SMS_CONFIG.brandName !== "Baotrixemay";
+  // Gửi SMS thật theo provider
+  if (provider === "infobip") {
+    return sendInfobipSMS(data);
+  } else if (provider === "speedsms") {
+    return sendSpeedSMS(data);
+  } else if (provider === "esms") {
+    return sendESMS(data);
+  } else {
+    throw new Error(`Provider ${provider} chưa được hỗ trợ`);
+  }
+}
 
-    // SmsType: 2 = Không brandname (số ngẫu nhiên), 8 = Có brandname (CSKH)
+/**
+ * Gửi SMS qua Infobip (Global SMS Platform)
+ */
+async function sendInfobipSMS(data: SMSMessage): Promise<any> {
+  try {
+    console.log("📱 [SENDING REAL SMS via Infobip]", {
+      to: data.to,
+      provider: "infobip",
+      from: SMS_CONFIG.from,
+      note: "Infobip - Enterprise SMS Gateway",
+    });
+
+    // Infobip SMS API v1
+    const payload = {
+      messages: [
+        {
+          from: SMS_CONFIG.from,
+          destinations: [
+            {
+              to: data.to,
+            },
+          ],
+          text: data.message,
+        },
+      ],
+    };
+
+    const response = await fetch(`${SMS_CONFIG.baseUrl}/sms/2/text/advanced`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `App ${SMS_CONFIG.apiKey}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    console.log("✅ Infobip Response:", result);
+
+    // Infobip response format:
+    // { messages: [{ messageId, status: { groupId, groupName, id, name } }] }
+    if (result.messages && result.messages.length > 0) {
+      const message = result.messages[0];
+      const statusId = message.status?.groupId;
+
+      // Status groups: 1=PENDING, 2=UNDELIVERABLE, 3=DELIVERED, 4=EXPIRED, 5=REJECTED
+      if (statusId === 1 || statusId === 3) {
+        return {
+          success: true,
+          messageId: message.messageId,
+          timestamp: new Date().toISOString(),
+          provider: "infobip",
+          status: message.status?.groupName,
+        };
+      } else {
+        const errorMsg = message.status?.description || "SMS sending failed";
+        throw new Error(`Infobip Error [${statusId}]: ${errorMsg}`);
+      }
+    } else {
+      throw new Error("Infobip: No messages in response");
+    }
+  } catch (error: any) {
+    console.error("❌ Infobip API Error:", error);
+    throw error;
+  }
+}
+
+/**
+ * Gửi SMS qua SpeedSMS (không cần brandname)
+ */
+async function sendSpeedSMS(data: SMSMessage): Promise<any> {
+  try {
+    console.log("📱 [SENDING REAL SMS via SpeedSMS]", {
+      to: data.to,
+      provider: "speedsms",
+      note: "SpeedSMS không yêu cầu brandname",
+    });
+
+    // SpeedSMS API v5
+    const payload = {
+      to: [data.to], // Array của số điện thoại
+      content: data.message,
+      type: data.type === "otp" ? 3 : 2, // 2=CSKH, 3=OTP, 4=Quảng cáo
+      sender: "", // Để trống sẽ dùng số ngẫu nhiên
+    };
+
+    const response = await fetch("https://api.speedsms.vn/index.php/sms/send", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${SMS_CONFIG.accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const result = await response.json();
+
+    console.log("✅ SpeedSMS Response:", result);
+
+    // SpeedSMS response format:
+    // { status: "success", data: { ... } }
+    // { status: "error", error: { code, message } }
+    if (result.status === "success") {
+      return {
+        success: true,
+        messageId: result.data?.tranId || Date.now().toString(),
+        timestamp: new Date().toISOString(),
+        provider: "speedsms",
+      };
+    } else {
+      const errorMsg =
+        result.error?.message || result.message || "Lỗi không xác định";
+      throw new Error(`SpeedSMS Error: ${errorMsg}`);
+    }
+  } catch (error: any) {
+    console.error("❌ SpeedSMS API Error:", error);
+    throw error;
+  }
+}
+
+/**
+ * Gửi SMS qua eSMS (legacy, cần brandname)
+ */
+async function sendESMS(data: SMSMessage): Promise<any> {
+  try {
+    const hasBrandname =
+      SMS_CONFIG.brandName && SMS_CONFIG.brandName.trim() !== "";
+
     const smsType = hasBrandname ? 8 : 2;
 
     console.log("📱 [SENDING REAL SMS via eSMS]", {
       to: data.to,
-      provider: SMS_CONFIG.provider,
+      provider: "esms",
       smsType,
       hasBrandname,
       brandname: hasBrandname ? SMS_CONFIG.brandName : "N/A",
+      note: "eSMS yêu cầu brandname đã duyệt",
     });
 
     const payload: any = {
@@ -270,9 +434,9 @@ async function sendSMS(data: SMSMessage): Promise<any> {
       Phone: data.to,
       Content: data.message,
       SmsType: smsType,
+      IsUnicode: 0,
     };
 
-    // Chỉ thêm Brandname nếu có brandname hợp lệ và SmsType = 8
     if (hasBrandname && smsType === 8) {
       payload.Brandname = SMS_CONFIG.brandName;
     }
@@ -290,12 +454,8 @@ async function sendSMS(data: SMSMessage): Promise<any> {
 
     const result = await response.json();
 
-    console.log("✅ SMS Response:", result);
+    console.log("✅ eSMS Response:", result);
 
-    // eSMS response codes:
-    // 100 = Success
-    // 104 = Brandname không tồn tại hoặc chưa được duyệt
-    // 99 = Lỗi hệ thống
     if (result.CodeResult === "100") {
       return {
         success: true,
@@ -305,8 +465,7 @@ async function sendSMS(data: SMSMessage): Promise<any> {
       };
     } else {
       const errorMessages: { [key: string]: string } = {
-        "104":
-          'Brandname chưa được duyệt hoặc không tồn tại. Vui lòng đăng ký brandname tại esms.vn hoặc set SMS_BRAND_NAME="" để gửi không brandname',
+        "104": "Brandname chưa được duyệt hoặc không tồn tại",
         "99": "Lỗi hệ thống eSMS",
         "101": "Tài khoản không đủ tiền",
         "102": "Tài khoản bị khóa",
@@ -318,7 +477,7 @@ async function sendSMS(data: SMSMessage): Promise<any> {
       throw new Error(`eSMS Error [${result.CodeResult}]: ${errorMsg}`);
     }
   } catch (error: any) {
-    console.error("❌ SMS API Error:", error);
+    console.error("❌ eSMS API Error:", error);
     throw error;
   }
 }

@@ -52,7 +52,6 @@ interface MenuItem {
   category: string;
   image: string;
   popular: boolean;
-  spicy_level: number;
   available: boolean;
 }
 
@@ -741,6 +740,7 @@ function MenuTab({
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [formData, setFormData] = useState({
@@ -750,7 +750,6 @@ function MenuTab({
     category: "main",
     image: "",
     popular: false,
-    spicy_level: 0,
     available: true,
   });
 
@@ -782,7 +781,6 @@ function MenuTab({
       category: "main",
       image: "",
       popular: false,
-      spicy_level: 0,
       available: true,
     });
     setShowAddModal(true);
@@ -797,7 +795,6 @@ function MenuTab({
       category: item.category,
       image: item.image,
       popular: item.popular,
-      spicy_level: item.spicy_level,
       available: item.available,
     });
     setShowAddModal(true);
@@ -856,9 +853,16 @@ function MenuTab({
     }
   };
 
-  const filteredItems = menuItems.filter((item) =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredItems = menuItems.filter((item) => {
+    const matchesSearch = item.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      categoryFilter === "all" ||
+      item.category === categoryFilter ||
+      (categoryFilter === "side" && item.category === "topping");
+    return matchesSearch && matchesCategory;
+  });
 
   if (loading) {
     return (
@@ -872,23 +876,51 @@ function MenuTab({
   return (
     <div className="space-y-6">
       {/* Header Actions */}
-      <div className="flex justify-between items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-            size={20}
-          />
-          <input
-            type="text"
-            placeholder="Tìm kiếm món ăn..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
-          />
+      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 flex-1">
+          <div className="relative flex-1 max-w-md">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={20}
+            />
+            <input
+              type="text"
+              placeholder="Tìm kiếm món ăn..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+            />
+          </div>
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent bg-white"
+          >
+            <option value="all">Tất cả danh mục ({menuItems.length})</option>
+            <option value="main">
+              Món chính ({menuItems.filter((i) => i.category === "main").length}
+              )
+            </option>
+            <option value="combo">
+              Combo ({menuItems.filter((i) => i.category === "combo").length})
+            </option>
+            <option value="side">
+              Món phụ & Topping (
+              {
+                menuItems.filter(
+                  (i) => i.category === "side" || i.category === "topping"
+                ).length
+              }
+              )
+            </option>
+            <option value="drink">
+              Đồ uống ({menuItems.filter((i) => i.category === "drink").length})
+            </option>
+          </select>
         </div>
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 bg-hue-red text-white px-6 py-2 rounded-lg hover:bg-hue-redDark transition"
+          className="flex items-center justify-center gap-2 bg-hue-red text-white px-6 py-2 rounded-lg hover:bg-hue-redDark transition whitespace-nowrap"
         >
           <Plus size={20} />
           Thêm Món Mới
@@ -919,9 +951,19 @@ function MenuTab({
               <h3 className="font-bold text-lg text-gray-800 mb-2">
                 {item.name}
               </h3>
-              <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+              <p className="text-gray-600 text-sm mb-2 line-clamp-2">
                 {item.description}
               </p>
+              <div className="mb-3">
+                <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
+                  {item.category === "main" && "🍜 Món chính"}
+                  {item.category === "combo" && "🎁 Combo"}
+                  {(item.category === "side" || item.category === "topping") &&
+                    "🥗 Món phụ"}
+                  {item.category === "drink" && "🥤 Đồ uống"}
+                  {item.category === "dessert" && "🍰 Tráng miệng"}
+                </span>
+              </div>
               <div className="flex items-center justify-between mb-4">
                 <span className="text-hue-red font-bold text-xl">
                   {new Intl.NumberFormat("vi-VN").format(item.price)}đ
@@ -1045,10 +1087,8 @@ function MenuTab({
                     >
                       <option value="main">Món chính</option>
                       <option value="combo">Combo</option>
-                      <option value="side">Món phụ</option>
-                      <option value="topping">Topping</option>
+                      <option value="side">Món phụ & Topping</option>
                       <option value="drink">Đồ uống</option>
-                      <option value="dessert">Tráng miệng</option>
                     </select>
                   </div>
                 </div>
@@ -1064,25 +1104,6 @@ function MenuTab({
                       setFormData({ ...formData, image: e.target.value })
                     }
                     placeholder="https://..."
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Độ cay (0-5)
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.spicy_level}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        spicy_level: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    min="0"
-                    max="5"
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
                   />
                 </div>
@@ -2714,6 +2735,10 @@ function CouponsTab({
     usage_limit: 0,
     valid_until: "",
     is_active: true,
+    show_in_popup: false,
+    popup_priority: 999,
+    popup_badge: "",
+    popup_gradient: "",
   });
 
   useEffect(() => {
@@ -2751,6 +2776,10 @@ function CouponsTab({
       usage_limit: 0,
       valid_until: "",
       is_active: true,
+      show_in_popup: false,
+      popup_priority: 999,
+      popup_badge: "",
+      popup_gradient: "",
     });
     setShowAddModal(true);
   };
@@ -2769,6 +2798,10 @@ function CouponsTab({
         ? new Date(coupon.valid_until).toISOString().split("T")[0]
         : "",
       is_active: Boolean(coupon.is_active),
+      show_in_popup: Boolean(coupon.show_in_popup),
+      popup_priority: coupon.popup_priority || 999,
+      popup_badge: coupon.popup_badge || "",
+      popup_gradient: coupon.popup_gradient || "",
     });
     setShowAddModal(true);
   };
@@ -3257,6 +3290,131 @@ function CouponsTab({
                   >
                     Kích hoạt mã ngay
                   </label>
+                </div>
+
+                {/* Popup Management Section */}
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="text-lg font-bold text-gray-800 mb-4">
+                    🎁 Quản lý Popup Khuyến Mãi
+                  </h3>
+
+                  <div className="flex items-center gap-3 mb-4">
+                    <input
+                      type="checkbox"
+                      id="show_in_popup"
+                      checked={formData.show_in_popup}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          show_in_popup: e.target.checked,
+                        })
+                      }
+                      className="w-5 h-5 text-hue-red focus:ring-hue-red border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="show_in_popup"
+                      className="text-sm font-semibold text-gray-700"
+                    >
+                      Hiển thị trong popup trang chủ
+                    </label>
+                  </div>
+
+                  {formData.show_in_popup && (
+                    <div className="space-y-4 pl-8">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Thứ tự ưu tiên
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.popup_priority}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                popup_priority: parseInt(e.target.value) || 999,
+                              })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                            min="1"
+                            placeholder="1 = Ưu tiên cao nhất"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            Số nhỏ = hiển thị trước
+                          </p>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            Nhãn giảm giá
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.popup_badge}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                popup_badge: e.target.value,
+                              })
+                            }
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                            placeholder="-20%, -50K"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">
+                            VD: -20%, -50K, FREE
+                          </p>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-2">
+                          Màu gradient popup
+                        </label>
+                        <select
+                          value={formData.popup_gradient}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              popup_gradient: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                        >
+                          <option value="">Chọn màu gradient</option>
+                          <option value="linear-gradient(135deg, #667eea 0%, #764ba2 100%)">
+                            💜 Purple Dream
+                          </option>
+                          <option value="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)">
+                            🌸 Pink Passion
+                          </option>
+                          <option value="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)">
+                            💙 Ocean Blue
+                          </option>
+                          <option value="linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)">
+                            💚 Fresh Mint
+                          </option>
+                          <option value="linear-gradient(135deg, #fa709a 0%, #fee140 100%)">
+                            🌅 Sunset Glow
+                          </option>
+                          <option value="linear-gradient(135deg, #30cfd0 0%, #330867 100%)">
+                            🌊 Deep Ocean
+                          </option>
+                          <option value="linear-gradient(135deg, #ff9a56 0%, #ff6a88 100%)">
+                            🔥 Fire Coral
+                          </option>
+                          <option value="linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)">
+                            🍡 Cotton Candy
+                          </option>
+                        </select>
+                        {formData.popup_gradient && (
+                          <div
+                            className="mt-2 h-12 rounded-lg"
+                            style={{ background: formData.popup_gradient }}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex gap-3 pt-4">
@@ -4721,7 +4879,9 @@ function StaffTab({
   const [staff, setStaff] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editingStaff, setEditingStaff] = useState<any>(null);
   const [staffToDelete, setStaffToDelete] = useState<{
     id: number;
     username: string;
@@ -4730,6 +4890,12 @@ function StaffTab({
     username: "",
     password: "",
     role: "staff",
+  });
+  const [editFormData, setEditFormData] = useState({
+    role: "staff",
+    full_name: "",
+    email: "",
+    phone: "",
   });
 
   useEffect(() => {
@@ -4789,6 +4955,45 @@ function StaffTab({
   const handleDeleteClick = (member: any) => {
     setStaffToDelete({ id: member.id, username: member.username });
     setShowDeleteModal(true);
+  };
+
+  const handleEditClick = (member: any) => {
+    setEditingStaff(member);
+    setEditFormData({
+      role: member.role || "staff",
+      full_name: member.full_name || "",
+      email: member.email || "",
+      phone: member.phone || "",
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!editingStaff) return;
+
+    try {
+      const response = await fetch(`/api/staff/${editingStaff.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editFormData),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showToast("Cập nhật nhân viên thành công", "success");
+        setShowEditModal(false);
+        setEditingStaff(null);
+        fetchStaff();
+      } else {
+        showToast(data.error || "Không thể cập nhật nhân viên", "error");
+      }
+    } catch (error) {
+      console.error("Error updating staff:", error);
+      showToast("Lỗi khi cập nhật nhân viên", "error");
+    }
   };
 
   const deleteStaff = async () => {
@@ -4894,13 +5099,22 @@ function StaffTab({
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {member.role !== "admin" && (
-                      <button
-                        onClick={() => handleDeleteClick(member)}
-                        className="text-red-600 hover:text-red-800 transition"
-                        title="Xóa nhân viên"
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEditClick(member)}
+                          className="text-blue-600 hover:text-blue-800 transition"
+                          title="Sửa nhân viên"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteClick(member)}
+                          className="text-red-600 hover:text-red-800 transition"
+                          title="Xóa nhân viên"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
@@ -4990,6 +5204,113 @@ function StaffTab({
                   className="flex-1 px-4 py-2 bg-hue-red text-white rounded-lg hover:bg-hue-redDark transition"
                 >
                   Thêm
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Staff Modal */}
+      {showEditModal && editingStaff && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800">
+                Sửa Thông Tin Nhân Viên
+              </h3>
+            </div>
+
+            <form onSubmit={handleUpdateStaff} className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tên đăng nhập
+                </label>
+                <input
+                  type="text"
+                  value={editingStaff.username}
+                  disabled
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Họ tên
+                </label>
+                <input
+                  type="text"
+                  value={editFormData.full_name}
+                  onChange={(e) =>
+                    setEditFormData({
+                      ...editFormData,
+                      full_name: e.target.value,
+                    })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, email: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Số điện thoại
+                </label>
+                <input
+                  type="tel"
+                  value={editFormData.phone}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, phone: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Vai trò
+                </label>
+                <select
+                  value={editFormData.role}
+                  onChange={(e) =>
+                    setEditFormData({ ...editFormData, role: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hue-red focus:border-transparent"
+                >
+                  <option value="staff">Nhân viên</option>
+                  <option value="admin">Quản trị viên</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingStaff(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                >
+                  Cập nhật
                 </button>
               </div>
             </form>

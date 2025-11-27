@@ -207,19 +207,22 @@ export default function BookingForm() {
           onClose={() => setToast(null)}
         />
       )}
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-        <h2 className="font-display text-3xl font-bold text-hue-redDark mb-2 text-center">
+      <div className="max-w-2xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 md:p-8">
+        <h2 className="font-display text-2xl sm:text-3xl font-bold text-hue-redDark mb-1.5 sm:mb-2 text-center">
           Đặt Bàn
         </h2>
-        <p className="text-gray-600 text-center mb-8">
+        <p className="text-gray-600 text-center mb-6 sm:mb-8 text-sm sm:text-base">
           Vui lòng điền thông tin để đặt bàn trước
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 sm:space-y-5 md:space-y-6"
+        >
           {/* Name */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <User className="inline mr-2" size={16} />
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+              <User className="inline mr-1.5 sm:mr-2" size={14} />
               Họ và Tên *
             </label>
             <input
@@ -228,15 +231,15 @@ export default function BookingForm() {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base focus:border-hue-red outline-none transition"
               placeholder="Nguyễn Văn A"
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <Phone className="inline mr-2" size={16} />
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+              <Phone className="inline mr-1.5 sm:mr-2" size={14} />
               Số Điện Thoại *
             </label>
             <input
@@ -247,16 +250,18 @@ export default function BookingForm() {
               required
               pattern="[0-9]{10,11}"
               title="Vui lòng nhập 10-11 chữ số"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base focus:border-hue-red outline-none transition"
               placeholder="0912345678"
             />
-            <p className="text-xs text-gray-500 mt-1">Nhập 10-11 chữ số</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
+              Nhập 10-11 chữ số
+            </p>
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <Mail className="inline mr-2" size={16} />
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+              <Mail className="inline mr-1.5 sm:mr-2" size={14} />
               Email
             </label>
             <input
@@ -264,16 +269,16 @@ export default function BookingForm() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base focus:border-hue-red outline-none transition"
               placeholder="email@example.com"
             />
           </div>
 
           {/* Date & Time */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <Calendar className="inline mr-2" size={16} />
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+                <Calendar className="inline mr-1.5 sm:mr-2" size={14} />
                 Ngày *
               </label>
               <input
@@ -283,15 +288,15 @@ export default function BookingForm() {
                 onChange={handleChange}
                 required
                 min={new Date().toISOString().split("T")[0]}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base focus:border-hue-red outline-none transition"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                 Chọn ngày từ hôm nay trở đi
               </p>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                <Clock className="inline mr-2" size={16} />
+              <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+                <Clock className="inline mr-1.5 sm:mr-2" size={14} />
                 Giờ *
               </label>
               <input
@@ -302,7 +307,7 @@ export default function BookingForm() {
                 required
                 list="time-suggestions"
                 placeholder="Chọn giờ"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base focus:border-hue-red outline-none transition"
               />
               <datalist id="time-suggestions">
                 <option value="07:00" />
@@ -322,7 +327,7 @@ export default function BookingForm() {
                 <option value="21:00" />
                 <option value="22:00" />
               </datalist>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
                 Giờ mở cửa: 7:00 - 22:00
               </p>
             </div>
@@ -330,8 +335,8 @@ export default function BookingForm() {
 
           {/* Guests */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <Users className="inline mr-2" size={16} />
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+              <Users className="inline mr-1.5 sm:mr-2" size={14} />
               Số Người *
             </label>
             <input
@@ -344,7 +349,7 @@ export default function BookingForm() {
               max="50"
               list="guests-suggestions"
               placeholder="2 người"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base focus:border-hue-red outline-none transition"
             />
             <datalist id="guests-suggestions">
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20, 25, 30, 40, 50].map(
@@ -353,7 +358,7 @@ export default function BookingForm() {
                 )
               )}
             </datalist>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-1">
               Đặt bàn cho nhóm lớn (&gt;20 người), vui lòng gọi trực tiếp:
               0901234567
             </p>
@@ -361,8 +366,8 @@ export default function BookingForm() {
 
           {/* Note */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              <MessageSquare className="inline mr-2" size={16} />
+            <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5 sm:mb-2">
+              <MessageSquare className="inline mr-1.5 sm:mr-2" size={14} />
               Ghi Chú
             </label>
             <textarea
@@ -370,7 +375,7 @@ export default function BookingForm() {
               value={formData.note}
               onChange={handleChange}
               rows={4}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-hue-red outline-none transition"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base focus:border-hue-red outline-none transition"
               placeholder="Yêu cầu đặc biệt (ví dụ: bàn gần cửa sổ, có ghế cho trẻ em...)"
             />
           </div>
@@ -378,12 +383,12 @@ export default function BookingForm() {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-hue-red text-white py-4 rounded-xl font-bold text-lg hover:bg-hue-redDark transition shadow-lg hover:shadow-xl"
+            className="w-full bg-hue-red text-white py-3 sm:py-3.5 md:py-4 rounded-lg sm:rounded-xl font-bold text-base sm:text-lg hover:bg-hue-redDark transition shadow-lg hover:shadow-xl active:scale-95"
           >
             Đặt Bàn Ngay
           </button>
 
-          <p className="text-sm text-gray-500 text-center">
+          <p className="text-xs sm:text-sm text-gray-500 text-center">
             * Bắt buộc | Chúng tôi sẽ liên hệ xác nhận trong vòng 15 phút
           </p>
         </form>

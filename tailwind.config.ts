@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: "480px", // Extra small devices (larger phones)
+      },
       colors: {
         // Bảng màu Huế truyền thống
         hue: {

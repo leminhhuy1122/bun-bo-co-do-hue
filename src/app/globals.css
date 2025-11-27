@@ -45,6 +45,19 @@
     animation: glow 2s ease-in-out infinite;
   }
 
+  .animate-snowfall {
+    animation: snowfall linear infinite;
+  }
+
+  @keyframes snowfall {
+    0% {
+      transform: translateY(-10px) translateX(0) rotate(0deg);
+    }
+    100% {
+      transform: translateY(100vh) translateX(20px) rotate(360deg);
+    }
+  }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -122,6 +135,31 @@
 
 body {
   font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"] {
+    min-height: 44px; /* iOS recommended touch target */
+    min-width: 44px;
+  }
+}
+
+/* Prevent horizontal scroll on mobile */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Optimize text rendering */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Hide scrollbar for all browsers while keeping scroll functionality */

@@ -5,6 +5,8 @@ import { useCart } from "@/context/CartContext";
 import MenuCard from "@/components/MenuCard";
 import MenuModal from "@/components/MenuModal";
 import Toast from "@/components/Toast";
+import FloatingCart from "@/components/FloatingCart";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { MenuItem, Topping } from "@/types";
 import { Filter, Search } from "lucide-react";
 
@@ -93,6 +95,7 @@ export default function MenuPage() {
 
   return (
     <>
+      <FloatingCart />
       {toast && (
         <Toast
           message={toast.message}
@@ -102,150 +105,159 @@ export default function MenuPage() {
       )}
       <div className="py-12">
         <div className="container mx-auto px-4">
+          {/* Loading State */}
+          {loading && (
+            <LoadingSpinner size="lg" message="Đang tải thực đơn..." />
+          )}
+
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="font-display text-5xl font-bold text-hue-redDark mb-4">
-              Thực Đơn
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Khám phá các món ăn đặc sản Huế chính gốc
-            </p>
-          </div>
-
-          {/* Search & Filter */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-12">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Search */}
-              <div className="flex-1 relative">
-                <Search
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  size={20}
-                />
-                <input
-                  type="text"
-                  placeholder="Tìm món ăn..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-hue-red outline-none transition"
-                />
+          {!loading && (
+            <>
+              <div className="text-center mb-12">
+                <h1 className="font-display text-5xl font-bold text-hue-redDark mb-4">
+                  Thực Đơn
+                </h1>
+                <p className="text-gray-600 text-lg">
+                  Khám phá các món ăn đặc sản Huế chính gốc
+                </p>
               </div>
 
-              {/* Filter */}
-              <div className="flex gap-2 items-center">
-                <Filter size={20} className="text-gray-500" />
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-hue-red outline-none transition"
-                >
-                  <option value="all">Tất cả</option>
-                  <option value="combo">🎁 Combo Tiết Kiệm</option>
-                  <option value="popular">Bán chạy</option>
-                  <option value="spicy">Cay nồng</option>
-                  <option value="side">Món phụ</option>
-                </select>
-              </div>
-            </div>
-          </div>
+              {/* Search & Filter */}
+              <div className="bg-white rounded-2xl shadow-lg p-6 mb-12">
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* Search */}
+                  <div className="flex-1 relative">
+                    <Search
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      size={20}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Tìm món ăn..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-xl focus:border-hue-red outline-none transition"
+                    />
+                  </div>
 
-          {/* Combos */}
-          {shouldShowSection("combos") && combos.length > 0 && (
-            <section className="mb-16">
-              <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                <span className="text-4xl">🎁</span>
-                Combo Tiết Kiệm
-              </h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                {combos.map((item) => (
-                  <MenuCard
-                    key={item.id}
-                    item={item}
-                    onViewDetail={handleViewDetail}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Main Dishes */}
-          {shouldShowSection("main") && (
-            <section className="mb-16">
-              <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                <span className="text-4xl">🍜</span>
-                Bún Bò Huế
-              </h2>
-              <div className="grid md:grid-cols-3 gap-6">
-                {getFilteredItems().map((item) => (
-                  <MenuCard
-                    key={item.id}
-                    item={item}
-                    onViewDetail={handleViewDetail}
-                  />
-                ))}
-              </div>
-              {getFilteredItems().length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                  Không tìm thấy món ăn phù hợp
+                  {/* Filter */}
+                  <div className="flex gap-2 items-center">
+                    <Filter size={20} className="text-gray-500" />
+                    <select
+                      value={categoryFilter}
+                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      className="px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-hue-red outline-none transition"
+                    >
+                      <option value="all">Tất cả</option>
+                      <option value="combo">🎁 Combo Tiết Kiệm</option>
+                      <option value="popular">Bán chạy</option>
+                      <option value="spicy">Cay nồng</option>
+                      <option value="side">Món phụ</option>
+                    </select>
+                  </div>
                 </div>
+              </div>
+
+              {/* Combos */}
+              {shouldShowSection("combos") && combos.length > 0 && (
+                <section className="mb-16">
+                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
+                    <span className="text-4xl">🎁</span>
+                    Combo Tiết Kiệm
+                  </h2>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {combos.map((item) => (
+                      <MenuCard
+                        key={item.id}
+                        item={item}
+                        onViewDetail={handleViewDetail}
+                      />
+                    ))}
+                  </div>
+                </section>
               )}
-            </section>
-          )}
 
-          {/* Side Dishes */}
-          {shouldShowSection("side") && sideDishes.length > 0 && (
-            <section className="mb-16">
-              <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                <span className="text-4xl">🍲</span>
-                Các Món Phụ
-              </h2>
-              <div className="grid md:grid-cols-4 gap-6">
-                {sideDishes.map((item) => (
-                  <MenuCard
-                    key={item.id}
-                    item={item}
-                    onViewDetail={handleViewDetail}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+              {/* Main Dishes */}
+              {shouldShowSection("main") && (
+                <section className="mb-16">
+                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
+                    <span className="text-4xl">🍜</span>
+                    Bún Bò Huế
+                  </h2>
+                  <div className="grid md:grid-cols-3 gap-6">
+                    {getFilteredItems().map((item) => (
+                      <MenuCard
+                        key={item.id}
+                        item={item}
+                        onViewDetail={handleViewDetail}
+                      />
+                    ))}
+                  </div>
+                  {getFilteredItems().length === 0 && (
+                    <div className="text-center py-12 text-gray-500">
+                      Không tìm thấy món ăn phù hợp
+                    </div>
+                  )}
+                </section>
+              )}
 
-          {/* Drinks */}
-          {shouldShowSection("drinks") && drinks.length > 0 && (
-            <section className="mb-16">
-              <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                <span className="text-4xl">🥤</span>
-                Đồ Uống
-              </h2>
-              <div className="grid md:grid-cols-4 gap-6">
-                {drinks.map((item) => (
-                  <MenuCard
-                    key={item.id}
-                    item={item}
-                    onViewDetail={handleViewDetail}
-                  />
-                ))}
-              </div>
-            </section>
-          )}
+              {/* Side Dishes */}
+              {shouldShowSection("side") && sideDishes.length > 0 && (
+                <section className="mb-16">
+                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
+                    <span className="text-4xl">🍲</span>
+                    Các Món Phụ
+                  </h2>
+                  <div className="grid md:grid-cols-4 gap-6">
+                    {sideDishes.map((item) => (
+                      <MenuCard
+                        key={item.id}
+                        item={item}
+                        onViewDetail={handleViewDetail}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
 
-          {/* Desserts */}
-          {shouldShowSection("desserts") && desserts.length > 0 && (
-            <section className="mb-16">
-              <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
-                <span className="text-4xl">🍮</span>
-                Tráng Miệng
-              </h2>
-              <div className="grid md:grid-cols-4 gap-6">
-                {desserts.map((item) => (
-                  <MenuCard
-                    key={item.id}
-                    item={item}
-                    onViewDetail={handleViewDetail}
-                  />
-                ))}
-              </div>
-            </section>
+              {/* Drinks */}
+              {shouldShowSection("drinks") && drinks.length > 0 && (
+                <section className="mb-16">
+                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
+                    <span className="text-4xl">🥤</span>
+                    Đồ Uống
+                  </h2>
+                  <div className="grid md:grid-cols-4 gap-6">
+                    {drinks.map((item) => (
+                      <MenuCard
+                        key={item.id}
+                        item={item}
+                        onViewDetail={handleViewDetail}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* Desserts */}
+              {shouldShowSection("desserts") && desserts.length > 0 && (
+                <section className="mb-16">
+                  <h2 className="font-display text-3xl font-bold text-hue-redDark mb-6 flex items-center gap-3">
+                    <span className="text-4xl">🍮</span>
+                    Tráng Miệng
+                  </h2>
+                  <div className="grid md:grid-cols-4 gap-6">
+                    {desserts.map((item) => (
+                      <MenuCard
+                        key={item.id}
+                        item={item}
+                        onViewDetail={handleViewDetail}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           )}
         </div>
 

@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
       FROM sms_logs sl
       LEFT JOIN orders o ON sl.order_id = o.id
       ORDER BY sl.sent_at DESC
-      LIMIT ? OFFSET ?`,
-      [limit, offset]
+      LIMIT ${limit} OFFSET ${offset}`,
+      []
     );
 
     // Lấy tổng số

@@ -10,32 +10,58 @@ export async function PUT(
   try {
     const id = params.id;
     const body = await request.json();
-    const {
-      description,
-      discount_value,
-      min_order_amount,
-      max_discount_amount,
-      usage_limit,
-      valid_until,
-      is_active,
-    } = body;
+
+    // Lấy thông tin coupon hiện tại
+    const currentCoupon: any = await query(
+      "SELECT * FROM coupons WHERE id = ?",
+      [id]
+    );
+
+    if (!currentCoupon || currentCoupon.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Không tìm thấy mã giảm giá",
+        },
+        { status: 404 }
+      );
+    }
+
+    // Merge dữ liệu mới với dữ liệu hiện tại
+    const updatedData = {
+      ...currentCoupon[0],
+      ...body,
+    };
 
     const sql = `
       UPDATE coupons 
-      SET description = ?, discount_value = ?, min_order_amount = ?,
-          max_discount_amount = ?, usage_limit = ?, valid_until = ?,
-          is_active = ?, updated_at = CURRENT_TIMESTAMP
+      SET description = ?, 
+          discount_value = ?, 
+          min_order_amount = ?,
+          max_discount_amount = ?, 
+          usage_limit = ?, 
+          valid_until = ?,
+          is_active = ?,
+          show_in_popup = ?,
+          popup_priority = ?,
+          popup_badge = ?,
+          popup_gradient = ?,
+          updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `;
 
     await query(sql, [
-      description,
-      discount_value,
-      min_order_amount,
-      max_discount_amount,
-      usage_limit,
-      valid_until,
-      is_active,
+      updatedData.description,
+      updatedData.discount_value,
+      updatedData.min_order_amount,
+      updatedData.max_discount_amount,
+      updatedData.usage_limit,
+      updatedData.valid_until,
+      updatedData.is_active,
+      updatedData.show_in_popup || false,
+      updatedData.popup_priority || 999,
+      updatedData.popup_badge || null,
+      updatedData.popup_gradient || null,
       id,
     ]);
 
